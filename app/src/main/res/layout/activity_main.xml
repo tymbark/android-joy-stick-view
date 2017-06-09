@@ -7,17 +7,67 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:gravity="center"
+        android:gravity="center_horizontal"
         android:orientation="vertical">
 
-        <!--<TextView-->
-            <!--android:layout_width="wrap_content"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:text="Hello World!"/>-->
+        <Button
+            android:id="@+id/mode"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="20dp"
+            android:text="Mode"/>
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/seek_angle"
+            android:layout_width="360dp"
+            android:layout_height="wrap_content"
+            android:max="360"
+            android:progress="0"/>
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/seek_items"
+            android:layout_width="240dp"
+            android:layout_height="wrap_content"
+            android:max="6"
+            android:progress="0"/>
+
+        <android.support.v7.widget.AppCompatSeekBar
+            android:id="@+id/seek_spread"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:max="100"
+            android:progress="0"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:padding="20dp">
+
+            <TextView
+                android:id="@+id/items"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="20dp"/>
+
+            <TextView
+                android:id="@+id/angle"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingRight="20dp"/>
+
+            <TextView
+                android:id="@+id/spread"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
 
         <com.damianmichalak.joystick.JoyStickView
+            android:id="@+id/joystick"
             android:layout_width="wrap_content"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:padding="100dp"/>
 
     </LinearLayout>
 

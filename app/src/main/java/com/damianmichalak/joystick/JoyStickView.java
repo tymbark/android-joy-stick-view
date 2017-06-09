@@ -18,8 +18,11 @@ import android.view.animation.AccelerateInterpolator;
 import static com.damianmichalak.joystick.JoyStickView.Mode.CLOSED;
 import static com.damianmichalak.joystick.JoyStickView.Mode.MIDDLE;
 import static com.damianmichalak.joystick.JoyStickView.Mode.OPENED;
+import static java.lang.Math.cos;
+import static java.lang.Math.sin;
 
 public class JoyStickView extends View {
+
 
     enum Mode {OPENED, MIDDLE, CLOSED}
 
@@ -39,6 +42,7 @@ public class JoyStickView extends View {
     private Mode mode = CLOSED;
     private Paint paintRed;
     private Paint paintGreen;
+    private Paint paintWhite;
 
     private final RectF ovalModeOpened = new RectF();
     private final RectF ovalModeClosed = new RectF();
@@ -51,6 +55,10 @@ public class JoyStickView extends View {
     private Drawable callDrawable;
 
     private float scaleAnimation = 0;
+
+    private int count = 4;
+    private int angle = 0;
+    private float spread = 1;
 
     public JoyStickView(Context context) {
         super(context);
@@ -79,10 +87,17 @@ public class JoyStickView extends View {
         paintGreen = new Paint();
         paintGreen.setColor(Color.GREEN);
         paintGreen.setAntiAlias(true);
+        paintGreen.setStrokeWidth(10);
+        paintWhite = new Paint();
+        paintWhite.setColor(Color.WHITE);
+        paintWhite.setAntiAlias(true);
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
+
+        final int height8 = actualHeightOpenedPX / 8;
+        final int width8 = actualWidthOpenedPX / 8;
 
         ovalModeClosed.set(
                 (actualWidthOpenedPX / 4) - ((actualWidthOpenedPX / 4) * scaleAnimation),
@@ -92,17 +107,34 @@ public class JoyStickView extends View {
         );
         canvas.drawOval(ovalModeClosed, paintRed);
 
-        if (mode == OPENED) {
-            searchDrawable.setBounds(actualWidthOpenedPX / 8, actualHeightOpenedPX / 8, actualWidthOpenedPX * 3 / 8, actualHeightOpenedPX * 3 / 8);
-            searchDrawable.draw(canvas);
-            editDrawable.setBounds(actualWidthOpenedPX * 5 / 8, actualHeightOpenedPX / 8, actualWidthOpenedPX * 7 / 8, actualHeightOpenedPX * 3 / 8);
-            editDrawable.draw(canvas);
-            deleteDrawable.setBounds(actualWidthOpenedPX / 8, actualHeightOpenedPX * 5 / 8, actualWidthOpenedPX * 3 / 8, actualHeightOpenedPX * 7 / 8);
-            deleteDrawable.draw(canvas);
-            callDrawable.setBounds(actualWidthOpenedPX * 5 / 8, actualHeightOpenedPX * 5 / 8, actualWidthOpenedPX * 7 / 8, actualHeightOpenedPX * 7 / 8);
-            callDrawable.draw(canvas);
-        }
+        if (count < 2) return;
+        for (int i = 0; i < count; i++) {
+            int r = width8 * 4;
+            int x0 = width8 * 4;
+            int y0 = width8 * 4;
 
+            int px;
+            int py;
+
+            final int slice = (i * (360 / count)) + angle;
+
+            px = (int) (x0 + r * cos(Math.toRadians(slice)));
+            py = (int) (y0 + r * sin(Math.toRadians(slice)));
+
+            canvas.drawLine(x0, y0, px, py, paintWhite);
+
+
+            float cx = ((spread * x0) + px) / (spread + 1);
+            float cy = ((spread * y0) + py) / (spread + 1);
+
+//            canvas.drawRect(cx - width8, cy - height8, cx + width8, cy + height8, paintGreen);
+
+            if (mode == OPENED) {
+                searchDrawable.setBounds((int) cx - width8, (int) cy - height8, (int) cx + width8, (int) cy + height8);
+                searchDrawable.draw(canvas);
+            }
+
+        }
     }
 
     @Override
@@ -195,6 +227,35 @@ public class JoyStickView extends View {
 
         invalidate();
         return true;
+    }
+
+    public void setItemsCount(int count) {
+        this.count = count;
+        invalidate();
+    }
+
+    public void setAngle(int angle) {
+        this.angle = angle;
+        invalidate();
+    }
+
+    public void setFixedMode(boolean on) {
+        mode = on ? OPENED : CLOSED;
+        scaleAnimation = on ? 1 : 0;
+        invalidate();
+    }
+
+    public boolean getMode() {
+        return mode.equals(OPENED);
+    }
+
+    public float getSpread() {
+        return spread;
+    }
+
+    public void setSpread(float spread) {
+        this.spread = spread;
+        invalidate();
     }
 
     public float getScaleAnimation() {
