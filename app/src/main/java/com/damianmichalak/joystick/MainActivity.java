@@ -25,7 +25,7 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.mode).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                joyStickView.setFixedMode(!joyStickView.getMode());
+                joyStickView.setOpenedFixedMode(!joyStickView.getMode());
             }
         });
 

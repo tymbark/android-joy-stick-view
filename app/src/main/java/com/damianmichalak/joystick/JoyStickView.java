@@ -27,7 +27,6 @@ import static java.lang.Math.sin;
 
 public class JoyStickView extends View {
 
-
     enum Mode {OPENED, MIDDLE, CLOSED}
 
     private static final int DEFAULT_WIDTH_OPENED_DP = 120;
@@ -38,11 +37,6 @@ public class JoyStickView extends View {
     private final int defaultWidthOpenedPX = (int) (DEFAULT_WIDTH_OPENED_DP * density);
     private final int defaultHeightOpenedPX = (int) (DEFAULT_HEIGHT_OPENED_DP * density);
 
-    private int actualWidthOpenedPX;
-    private int actualHeightOpenedPX;
-    private int actualHeightClosedPX;
-    private int actualWidthClosedPX;
-
     private Mode mode = CLOSED;
     private Paint paintRed;
     private Paint paintGreen;
@@ -51,8 +45,6 @@ public class JoyStickView extends View {
 
     private final RectF ovalModeOpened = new RectF();
     private final RectF ovalModeClosed = new RectF();
-    private ObjectAnimator enlargeAnimation;
-    private ObjectAnimator shrinkAnimation;
 
     private final List<PointF> drawableCenterPoints = new ArrayList<>();
 
@@ -63,6 +55,7 @@ public class JoyStickView extends View {
 
     private float scaleAnimation = 0;
 
+    private int diameter;
     private int count = 4;
     private int angle = 0;
     private float spread = 0.5f;
@@ -83,7 +76,6 @@ public class JoyStickView extends View {
     }
 
     private void init(Context context) {
-        Log.d("LOGS", "constructor");
         searchDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_search);
         editDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_edit);
         deleteDrawable = ContextCompat.getDrawable(context, android.R.drawable.ic_menu_delete);
@@ -114,7 +106,7 @@ public class JoyStickView extends View {
         if (count < 2) return;
 
         drawableCenterPoints.clear();
-        final int width8 = actualWidthOpenedPX / 8;
+        final int width8 = diameter / 8;
 
         for (int i = 0; i < count; i++) {
             int r = (int) (width8 * 4 * spread);
@@ -134,14 +126,14 @@ public class JoyStickView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
 
-        final int height8 = actualHeightOpenedPX / 8;
-        final int width8 = actualWidthOpenedPX / 8;
+        final int height8 = diameter / 8;
+        final int width8 = diameter / 8;
 
         ovalModeClosed.set(
-                (actualWidthOpenedPX / 4) - ((actualWidthOpenedPX / 4) * scaleAnimation),
-                (actualHeightOpenedPX / 4) - ((actualHeightOpenedPX / 4) * scaleAnimation),
-                (actualWidthOpenedPX * 3 / 4) + ((actualWidthOpenedPX / 4) * scaleAnimation),
-                (actualHeightOpenedPX * 3 / 4) + ((actualHeightOpenedPX / 4) * scaleAnimation)
+                (diameter / 4) - ((diameter / 4) * scaleAnimation),
+                (diameter / 4) - ((diameter / 4) * scaleAnimation),
+                (diameter * 3 / 4) + ((diameter / 4) * scaleAnimation),
+                (diameter * 3 / 4) + ((diameter / 4) * scaleAnimation)
         );
         canvas.drawOval(ovalModeClosed, paintRed);
 
@@ -159,7 +151,7 @@ public class JoyStickView extends View {
 
     private void drawDebugLines(Canvas canvas) {
         for (int i = 0; i < count; i++) {
-            final int width8 = actualWidthOpenedPX / 8;
+            final int width8 = diameter / 8;
 
             int r = width8 * 4;
             int x0 = width8 * 4;
@@ -179,11 +171,13 @@ public class JoyStickView extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        Log.d("LOGS", "onMeasure");
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+        int actualWidthOpenedPX;
+        int actualHeightOpenedPX;
 
         if (widthMode == MeasureSpec.EXACTLY) {
             actualWidthOpenedPX = widthSize;
@@ -201,29 +195,26 @@ public class JoyStickView extends View {
             actualHeightOpenedPX = defaultHeightOpenedPX;
         }
 
-        actualHeightClosedPX = actualHeightOpenedPX / 2;
-        actualWidthClosedPX = actualWidthOpenedPX / 2;
+        // picking the smaller side of the view as diameter
+        diameter = Math.min(actualHeightOpenedPX, actualWidthOpenedPX);
 
-        ovalModeClosed.set(actualWidthOpenedPX / 4, actualHeightOpenedPX / 4, actualWidthOpenedPX * 3 / 4, actualHeightOpenedPX * 3 / 4);
-        ovalModeOpened.set(0, 0, actualWidthOpenedPX, actualHeightOpenedPX);
+        ovalModeClosed.set(diameter / 4, diameter / 4, diameter * 3 / 4, diameter * 3 / 4);
+        ovalModeOpened.set(0, 0, diameter, diameter);
 
-        Log.d("LOGS", "width:" + actualWidthOpenedPX + " | height:" + actualHeightOpenedPX);
-        setMeasuredDimension(actualWidthOpenedPX, actualHeightOpenedPX);
+        setMeasuredDimension(diameter, diameter);
     }
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         if (event.getAction() == MotionEvent.ACTION_DOWN) {
-            Log.d("LOGS", "down: " + scaleAnimation);
             mode = OPENED;
-            enlargeAnimation = ObjectAnimator.ofFloat(this, "scaleAnimation", scaleAnimation, 1);
+            final ObjectAnimator enlargeAnimation = ObjectAnimator.ofFloat(this, "scaleAnimation", scaleAnimation, 1);
             enlargeAnimation.setDuration(100);
             enlargeAnimation.setInterpolator(new AccelerateInterpolator());
             enlargeAnimation.start();
         } else if (event.getAction() == MotionEvent.ACTION_UP) {
-            Log.d("LOGS", "up: " + scaleAnimation);
             mode = CLOSED;
-            shrinkAnimation = ObjectAnimator.ofFloat(this, "scaleAnimation", scaleAnimation, 0);
+            final ObjectAnimator shrinkAnimation = ObjectAnimator.ofFloat(this, "scaleAnimation", scaleAnimation, 0);
             shrinkAnimation.setDuration(100);
             shrinkAnimation.setInterpolator(new AccelerateInterpolator());
             shrinkAnimation.start();
@@ -250,7 +241,7 @@ public class JoyStickView extends View {
         invalidate();
     }
 
-    public void setFixedMode(boolean on) {
+    public void setOpenedFixedMode(boolean on) {
         mode = on ? OPENED : CLOSED;
         scaleAnimation = on ? 1 : 0;
         invalidate();
