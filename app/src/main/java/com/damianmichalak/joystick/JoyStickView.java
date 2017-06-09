@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.drawable.Drawable;
 import android.support.annotation.Nullable;
@@ -14,6 +15,9 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.AccelerateInterpolator;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static com.damianmichalak.joystick.JoyStickView.Mode.CLOSED;
 import static com.damianmichalak.joystick.JoyStickView.Mode.MIDDLE;
@@ -43,11 +47,14 @@ public class JoyStickView extends View {
     private Paint paintRed;
     private Paint paintGreen;
     private Paint paintWhite;
+    private Paint paintBlue;
 
     private final RectF ovalModeOpened = new RectF();
     private final RectF ovalModeClosed = new RectF();
     private ObjectAnimator enlargeAnimation;
     private ObjectAnimator shrinkAnimation;
+
+    private final List<PointF> drawableCenterPoints = new ArrayList<>();
 
     private Drawable searchDrawable;
     private Drawable editDrawable;
@@ -58,7 +65,7 @@ public class JoyStickView extends View {
 
     private int count = 4;
     private int angle = 0;
-    private float spread = 1;
+    private float spread = 0.5f;
 
     public JoyStickView(Context context) {
         super(context);
@@ -91,6 +98,37 @@ public class JoyStickView extends View {
         paintWhite = new Paint();
         paintWhite.setColor(Color.WHITE);
         paintWhite.setAntiAlias(true);
+        paintBlue = new Paint();
+        paintBlue.setColor(Color.BLUE);
+        paintBlue.setAntiAlias(true);
+        calculateDrawableCenterPoints();
+    }
+
+    @Override
+    public void invalidate() {
+        calculateDrawableCenterPoints();
+        super.invalidate();
+    }
+
+    private void calculateDrawableCenterPoints() {
+        if (count < 2) return;
+
+        drawableCenterPoints.clear();
+        final int width8 = actualWidthOpenedPX / 8;
+
+        for (int i = 0; i < count; i++) {
+            int r = (int) (width8 * 4 * spread);
+            int centerX = width8 * 4;
+            int centerY = width8 * 4;
+
+            final int slice = (i * (360 / count)) + angle;
+
+            float drawableCenterX = (float) (centerX + r * cos(Math.toRadians(slice)));
+            float drawableCenterY = (float) (centerY + r * sin(Math.toRadians(slice)));
+
+            drawableCenterPoints.add(new PointF(drawableCenterX, drawableCenterY));
+
+        }
     }
 
     @Override
@@ -107,8 +145,22 @@ public class JoyStickView extends View {
         );
         canvas.drawOval(ovalModeClosed, paintRed);
 
+        drawDebugLines(canvas);
+
         if (count < 2) return;
+
+        if (mode == OPENED) {
+            for (PointF point : drawableCenterPoints) {
+                searchDrawable.setBounds((int) point.x - width8, (int) point.y - height8, (int) point.x + width8, (int) point.y + height8);
+                searchDrawable.draw(canvas);
+            }
+        }
+    }
+
+    private void drawDebugLines(Canvas canvas) {
         for (int i = 0; i < count; i++) {
+            final int width8 = actualWidthOpenedPX / 8;
+
             int r = width8 * 4;
             int x0 = width8 * 4;
             int y0 = width8 * 4;
@@ -116,24 +168,12 @@ public class JoyStickView extends View {
             int px;
             int py;
 
-            final int slice = (i * (360 / count)) + angle;
+            final int slice = (i * (360 / count)) + angle + (180 / count);
 
             px = (int) (x0 + r * cos(Math.toRadians(slice)));
             py = (int) (y0 + r * sin(Math.toRadians(slice)));
 
-            canvas.drawLine(x0, y0, px, py, paintWhite);
-
-
-            float cx = ((spread * x0) + px) / (spread + 1);
-            float cy = ((spread * y0) + py) / (spread + 1);
-
-//            canvas.drawRect(cx - width8, cy - height8, cx + width8, cy + height8, paintGreen);
-
-            if (mode == OPENED) {
-                searchDrawable.setBounds((int) cx - width8, (int) cy - height8, (int) cx + width8, (int) cy + height8);
-                searchDrawable.draw(canvas);
-            }
-
+            canvas.drawLine(x0, y0, px, py, paintBlue);
         }
     }
 
@@ -192,37 +232,8 @@ public class JoyStickView extends View {
         if (mode.equals(OPENED)) {
             final float x = event.getX();
             final float y = event.getY();
-            if (x < actualWidthOpenedPX / 2) {
-                //LEFT
-                if (y < actualHeightOpenedPX / 2) {
-                    //TOP
-                    searchDrawable.setAlpha(128);
-                    deleteDrawable.setAlpha(255);
-                    editDrawable.setAlpha(255);
-                    callDrawable.setAlpha(255);
-                } else {
-                    //BOTTOM
-                    searchDrawable.setAlpha(255);
-                    deleteDrawable.setAlpha(128);
-                    editDrawable.setAlpha(255);
-                    callDrawable.setAlpha(255);
-                }
-            } else {
-                //RIGHT
-                if (y < actualHeightOpenedPX / 2) {
-                    searchDrawable.setAlpha(255);
-                    deleteDrawable.setAlpha(255);
-                    editDrawable.setAlpha(128);
-                    callDrawable.setAlpha(255);
-                    //TOP
-                } else {
-                    //BOTTOM
-                    searchDrawable.setAlpha(255);
-                    deleteDrawable.setAlpha(255);
-                    editDrawable.setAlpha(255);
-                    callDrawable.setAlpha(128);
-                }
-            }
+
+
         }
 
         invalidate();

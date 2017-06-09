@@ -68,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
         seekSpread.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                final float x = (float) progress / 20;
+                final float x = (float) progress / 100;
                 spread.setText("spread: " + x);
                 joyStickView.setSpread(x);
             }

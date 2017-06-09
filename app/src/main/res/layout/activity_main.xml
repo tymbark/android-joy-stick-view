@@ -28,14 +28,14 @@
             android:id="@+id/seek_items"
             android:layout_width="240dp"
             android:layout_height="wrap_content"
-            android:max="6"
+            android:max="7"
             android:progress="0"/>
 
         <android.support.v7.widget.AppCompatSeekBar
             android:id="@+id/seek_spread"
             android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:max="100"
+            android:max="130"
             android:progress="0"/>
 
         <LinearLayout
