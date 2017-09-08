@@ -1,4 +1,4 @@
-package com.damianmichalak.joystick;
+package com.damianmichalak.joy_stick;
 
 import android.animation.ObjectAnimator;
 import android.content.Context;
@@ -19,9 +19,9 @@ import android.view.animation.AccelerateInterpolator;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.damianmichalak.joystick.JoyStickView.Mode.CLOSED;
-import static com.damianmichalak.joystick.JoyStickView.Mode.MIDDLE;
-import static com.damianmichalak.joystick.JoyStickView.Mode.OPENED;
+import static com.damianmichalak.joy_stick.JoyStickView.Mode.CLOSED;
+import static com.damianmichalak.joy_stick.JoyStickView.Mode.MIDDLE;
+import static com.damianmichalak.joy_stick.JoyStickView.Mode.OPENED;
 import static java.lang.Math.cos;
 import static java.lang.Math.sin;
 

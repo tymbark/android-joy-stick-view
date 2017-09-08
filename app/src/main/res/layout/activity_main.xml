@@ -63,7 +63,7 @@
 
         </LinearLayout>
 
-        <com.damianmichalak.joystick.JoyStickView
+        <com.damianmichalak.joy_stick.JoyStickView
             android:id="@+id/joystick"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"

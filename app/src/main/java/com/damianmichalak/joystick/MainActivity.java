@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.damianmichalak.joy_stick.JoyStickView;
+
 public class MainActivity extends AppCompatActivity {
 
     @Override
