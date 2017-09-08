@@ -60,6 +60,8 @@ public class JoyStickView extends View {
     private int angle = 0;
     private float spread = 0.5f;
 
+    private PointF click = new PointF();
+
     public JoyStickView(Context context) {
         super(context);
         init(context);
@@ -113,7 +115,7 @@ public class JoyStickView extends View {
             int centerX = width8 * 4;
             int centerY = width8 * 4;
 
-            final int slice = (i * (360 / count)) + angle;
+            final int slice = ((i * (360 / count)) + angle) % 360;
 
             float drawableCenterX = (float) (centerX + r * cos(Math.toRadians(slice)));
             float drawableCenterY = (float) (centerY + r * sin(Math.toRadians(slice)));
@@ -138,6 +140,7 @@ public class JoyStickView extends View {
         canvas.drawOval(ovalModeClosed, paintRed);
 
         drawDebugLines(canvas);
+        drawDebugClick(canvas);
 
         if (count < 2) return;
 
@@ -147,6 +150,24 @@ public class JoyStickView extends View {
                 searchDrawable.draw(canvas);
             }
         }
+    }
+
+    private void drawDebugClick(Canvas canvas) {
+
+        final int width8 = diameter / 8;
+
+        int r = width8 * 4;
+        int x0 = width8 * 4;
+        int y0 = width8 * 4;
+
+        int px;
+        int py;
+
+        px = (int) (click.x);
+        py = (int) (click.y);
+
+        canvas.drawLine(x0, y0, px, py, paintWhite);
+
     }
 
     private void drawDebugLines(Canvas canvas) {
@@ -224,7 +245,9 @@ public class JoyStickView extends View {
             final float x = event.getX();
             final float y = event.getY();
 
-
+            click.set(x, y);
+//            Log.d("CHUJ", " click p" + click);
+            Log.d("CHUJ", " click angle" + (180 + Math.toDegrees(Math.atan2(click.y - diameter / 2, click.x - diameter / 2))));
         }
 
         invalidate();
